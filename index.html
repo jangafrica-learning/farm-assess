@@ -424,9 +424,48 @@
       .card { padding: 13px; }
       .tab-button { padding-left: 12px; padding-right: 12px; }
     }
+
+
+    .server-setup {
+      z-index: 100;
+      padding: 18px;
+    }
+
+    .server-setup-card {
+      width: min(520px, 100%);
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    .server-setup-card h2 {
+      font-size: 19px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .server-setup { padding: 12px; align-items: center; }
+      .server-setup-card { padding: 18px; }
+    }
   </style>
 </head>
 <body>
+
+  <div id="serverSetup" class="modal server-setup" aria-hidden="true">
+    <div class="server-setup-card">
+      <h2>Connect Farm Assessment</h2>
+      <div id="serverSetupError" class="message"></div>
+      <form id="serverSetupForm">
+        <label for="serverUrlInput">Apps Script Web App URL</label>
+        <input id="serverUrlInput" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec" required>
+        <div class="form-actions">
+          <button type="submit" class="button button-primary">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <header class="topbar">
     <div class="shell">
       <div>
@@ -527,7 +566,8 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5FgAHrOnyDarLzdmKUcfT_wwBQri3vXnRGsw2FyPu-GvWXmF_9yEdn2qu2svd6CEosQ/exec";
+    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5FgAHrOnyDarLzdmKUcfT_wwBQri3vXnRGsw2FyPu-GvWXmF_9yEdn2qu2svd6CEosQ/exec";
+    const SERVER_URL_STORAGE_KEY = "kfa_web_app_url_v1";
     const CACHE_PREFIX = "kfa_browser_standby_v3_";
     const SESSION_SAVED_KEY = "kfa_session_saved_v3";
     const VIEW_LIMIT = 150;
@@ -538,6 +578,7 @@
     let recordsTableId = "";
     let savedCount = Number(sessionStorage.getItem(SESSION_SAVED_KEY) || 0);
     let failedCount = 0;
+    let webAppUrl = "";
 
     document.addEventListener("DOMContentLoaded", initialise);
 
@@ -546,9 +587,10 @@
       updateLiveDate();
       window.setInterval(updateLiveDate, 1000);
       updateMetrics();
+      webAppUrl = getConfiguredServerUrl();
 
       if (!isConfigured()) {
-        showError("entryError", "Add the current Apps Script /exec URL in this HTML file first.");
+        showServerSetup();
         return;
       }
 
@@ -556,6 +598,8 @@
     }
 
     function bindEvents() {
+      document.getElementById("serverSetupForm").addEventListener("submit", saveServerUrl);
+
       document.querySelectorAll("[data-tab]").forEach(function(button) {
         button.addEventListener("click", function() {
           openTab(button.dataset.tab);
@@ -586,8 +630,58 @@
       });
     }
 
+    function isValidServerUrl(url) {
+      return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(String(url || "").trim());
+    }
+
+    function getConfiguredServerUrl() {
+      let saved = "";
+
+      try {
+        saved = localStorage.getItem(SERVER_URL_STORAGE_KEY) || "";
+      } catch (error) {}
+
+      const candidate = saved || DEFAULT_WEB_APP_URL;
+      return String(candidate || "").trim().replace(/\/+$/, "");
+    }
+
     function isConfigured() {
-      return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(WEB_APP_URL);
+      return isValidServerUrl(webAppUrl);
+    }
+
+    function showServerSetup() {
+      const modal = document.getElementById("serverSetup");
+      const input = document.getElementById("serverUrlInput");
+      input.value = isValidServerUrl(DEFAULT_WEB_APP_URL) ? DEFAULT_WEB_APP_URL : "";
+      clearError("serverSetupError");
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      window.setTimeout(function() { input.focus(); }, 50);
+    }
+
+    function hideServerSetup() {
+      const modal = document.getElementById("serverSetup");
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function saveServerUrl(event) {
+      event.preventDefault();
+      const input = document.getElementById("serverUrlInput");
+      const url = String(input.value || "").trim().replace(/\/+$/, "");
+
+      if (!isValidServerUrl(url)) {
+        showError("serverSetupError", "Enter the Apps Script web app URL ending in /exec.");
+        return;
+      }
+
+      try {
+        localStorage.setItem(SERVER_URL_STORAGE_KEY, url);
+      } catch (error) {}
+
+      webAppUrl = url;
+      hideServerSetup();
+      loadPortal();
     }
 
     function loadPortal() {
@@ -1090,7 +1184,7 @@
         script = document.createElement("script");
         script.async = true;
         script.onerror = function() { finish(null, new Error("Unable to connect to the farm assessment server.")); };
-        script.src = WEB_APP_URL + "?" + new URLSearchParams(Object.assign({}, params, { callback: callback })).toString();
+        script.src = webAppUrl + "?" + new URLSearchParams(Object.assign({}, params, { callback: callback })).toString();
         document.body.appendChild(script);
       });
     }
