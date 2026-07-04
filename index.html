@@ -1,1208 +1,1152 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kankanba Farm Assessment</title>
-    <style>
-        :root {
-            --green: #146c3a;
-            --green-dark: #0d5129;
-            --green-soft: #eaf5ed;
-            --line: #d9e2da;
-            --text: #16231a;
-            --muted: #647266;
-            --paper: #ffffff;
-            --ground: #f7faf7;
-            --error-bg: #fff1f1;
-            --error: #9e1c1c;
-            --shadow: 0 5px 18px rgba(16, 49, 28, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-width: 320px;
-            background: var(--ground);
-            color: var(--text);
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
-
-        .topbar {
-            background: linear-gradient(135deg, var(--green-dark), var(--green));
-            color: #fff;
-            padding: 18px 0;
-        }
-
-        .shell {
-            width: min(100%, 1600px);
-            margin: 0 auto;
-            padding: 0 32px;
-        }
-
-        .topbar .shell {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-            min-width: 0;
-        }
-
-        h1,
-        h2,
-        h3,
-        p {
-            margin: 0;
-        }
-
-        h1 {
-            font-size: 18px;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            margin-top: 4px;
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .live-date {
-            flex: 0 0 auto;
-            white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 12px;
-            overflow: hidden;
-        }
-
-        .tabs {
-            background: #fff;
-            border-bottom: 1px solid var(--line);
-        }
-
-        .tab-list {
-            display: flex;
-            gap: 4px;
-            overflow-x: auto;
-        }
-
-        .tab-button {
-            appearance: none;
-            border: 0;
-            background: transparent;
-            color: #293a2e;
-            padding: 14px 20px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 13px;
-            border-bottom: 3px solid transparent;
-            white-space: nowrap;
-        }
-
-        .tab-button.active {
-            color: var(--green-dark);
-            border-bottom-color: var(--green);
-        }
-
-        main {
-            padding: 26px 0 40px;
-        }
-
-        .tab-panel {
-            display: none;
-        }
-
-        .tab-panel.active {
-            display: block;
-        }
-
-        .page-title {
-            font-size: 18px;
-            margin-bottom: 18px;
-        }
-
-        .card {
-            background: var(--paper);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 16px;
-        }
-
-        .metric {
-            background: var(--paper);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        .metric-label {
-            display: block;
-            color: var(--muted);
-            font-size: 12px;
-            margin-bottom: 4px;
-        }
-
-        .metric-value {
-            display: block;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--green-dark);
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: end;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-
-        .toolbar>div {
-            min-width: 220px;
-            flex: 1;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            border: 1px solid #becbbf;
-            border-radius: 9px;
-            color: var(--text);
-            background: #fff;
-            padding: 10px 11px;
-            outline: none;
-            font-size: 13px;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(20, 108, 58, 0.12);
-        }
-
-        textarea {
-            min-height: 112px;
-            resize: vertical;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-        }
-
-        .wide-field {
-            grid-column: 1 / -1;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .button {
-            border: 1px solid transparent;
-            border-radius: 9px;
-            padding: 10px 15px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.15s ease;
-        }
-
-        .button:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-        }
-
-        .button-primary {
-            background: var(--green);
-            color: #fff;
-        }
-
-        .button-primary:hover:not(:disabled) {
-            background: var(--green-dark);
-        }
-
-        .button-secondary {
-            background: #fff;
-            color: #233127;
-            border-color: #bdcabe;
-        }
-
-        .button-secondary:hover:not(:disabled) {
-            background: #f2f6f2;
-        }
-
-        .button-danger {
-            background: #fff;
-            color: #9b1b1b;
-            border-color: #dbb4b4;
-        }
-
-        .button-danger:hover:not(:disabled) {
-            background: #fff4f4;
-        }
-
-        .small-button {
-            padding: 7px 10px;
-            font-size: 12px;
-        }
-
-        .message {
-            display: none;
-            border: 1px solid #e0b6b6;
-            background: var(--error-bg);
-            color: var(--error);
-            border-radius: 9px;
-            padding: 10px 12px;
-            margin: 0 0 16px;
-            font-weight: 600;
-        }
-
-        .message.show {
-            display: block;
-        }
-
-        .empty-state {
-            color: var(--muted);
-            padding: 24px 0;
-            text-align: center;
-        }
-
-        .table-list {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .table-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            padding: 11px 12px;
-            background: #fbfdfb;
-        }
-
-        .table-card-title {
-            display: block;
-            font-weight: 700;
-        }
-
-        .table-card-group {
-            display: block;
-            color: var(--muted);
-            font-size: 11px;
-            margin-top: 2px;
-        }
-
-        .table-card-count {
-            font-weight: 700;
-            color: var(--green-dark);
-            min-width: 18px;
-            text-align: right;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-        }
-
-        table {
-            width: 100%;
-            min-width: 700px;
-            border-collapse: collapse;
-            background: #fff;
-            font-size: 12px;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #e4ece4;
-            text-align: left;
-            vertical-align: top;
-            word-break: break-word;
-        }
-
-        th {
-            background: #f1f7f2;
-            color: #233127;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        tr:last-child td {
-            border-bottom: 0;
-        }
-
-        .action-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .modal {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 18px;
-            background: rgba(12, 31, 18, 0.56);
-            z-index: 50;
-        }
-
-        .modal.open {
-            display: flex;
-        }
-
-        .modal-card {
-            width: min(920px, 100%);
-            max-height: calc(100vh - 36px);
-            overflow-y: auto;
-            background: #fff;
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            align-items: flex-start;
-            margin-bottom: 18px;
-        }
-
-        .modal-title {
-            font-size: 17px;
-        }
-
-        .icon-button {
-            background: transparent;
-            border: 0;
-            font-size: 21px;
-            line-height: 1;
-            cursor: pointer;
-            color: #526154;
-        }
-
-        footer {
-            background: #fff;
-            border-top: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 12px;
-            text-align: center;
-            padding: 15px;
-        }
-
-        @media (max-width: 760px) {
-            .shell {
-                padding: 0 16px;
-            }
-
-            .topbar {
-                padding: 14px 0;
-            }
-
-            .topbar .shell {
-                align-items: flex-start;
-            }
-
-            .live-date {
-                font-size: 11px;
-                padding: 7px 9px;
-            }
-
-            .metrics,
-            .table-list,
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .tab-button {
-                padding: 13px 14px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kankanba Farm Assessment</title>
+  <style>
+    :root {
+      --green: #146c3a;
+      --green-dark: #0d5129;
+      --line: #d9e2da;
+      --text: #16231a;
+      --muted: #647266;
+      --paper: #ffffff;
+      --ground: #f7faf7;
+      --error-bg: #fff1f1;
+      --error: #9e1c1c;
+      --shadow: 0 5px 18px rgba(16, 49, 28, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow-x: hidden;
+      background: var(--ground);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, select { -webkit-tap-highlight-color: transparent; }
+
+    .topbar {
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      color: #fff;
+      padding: 18px 0;
+    }
+
+    .shell {
+      width: min(100%, 1600px);
+      margin: 0 auto;
+      padding-left: clamp(16px, 3vw, 32px);
+      padding-right: clamp(16px, 3vw, 32px);
+    }
+
+    .topbar .shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .live-date {
+      flex: 0 1 auto;
+      max-width: min(100%, 285px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .tabs {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab-list {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-button {
+      appearance: none;
+      flex: 0 0 auto;
+      min-height: 48px;
+      border: 0;
+      background: transparent;
+      color: #293a2e;
+      padding: 14px 20px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab-button.active {
+      color: var(--green-dark);
+      border-bottom-color: var(--green);
+    }
+
+    main { padding: 26px 0 40px; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page-title {
+      font-size: clamp(18px, 2vw, 22px);
+      margin-bottom: 18px;
+    }
+
+    .card {
+      min-width: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      min-width: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .metric-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .toolbar > div { min-width: min(100%, 220px); flex: 1 1 220px; }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #becbbf;
+      border-radius: 9px;
+      color: var(--text);
+      background: #fff;
+      padding: 10px 11px;
+      outline: none;
+      font-size: 13px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(20, 108, 58, 0.12);
+    }
+
+    textarea { min-height: 112px; resize: vertical; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .wide-field { grid-column: 1 / -1; }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 10px 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .button-primary { background: var(--green); color: #fff; }
+    .button-primary:hover:not(:disabled) { background: var(--green-dark); }
+    .button-secondary { background: #fff; color: #233127; border-color: #bdcabe; }
+    .button-secondary:hover:not(:disabled) { background: #f2f6f2; }
+    .button-danger { background: #fff; color: #9b1b1b; border-color: #dbb4b4; }
+    .button-danger:hover:not(:disabled) { background: #fff4f4; }
+    .small-button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+
+    .message {
+      display: none;
+      border: 1px solid #e0b6b6;
+      background: var(--error-bg);
+      color: var(--error);
+      border-radius: 9px;
+      padding: 10px 12px;
+      margin: 0 0 16px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .message.show { display: block; }
+
+    .empty-state {
+      color: var(--muted);
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    .table-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .table-card {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      background: #fbfdfb;
+    }
+
+    .table-card-title { display: block; font-weight: 700; overflow-wrap: anywhere; }
+    .table-card-group { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; overflow-wrap: anywhere; }
+    .table-card-count { flex: 0 0 auto; font-weight: 700; color: var(--green-dark); min-width: 18px; text-align: right; }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e4ece4;
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: #f1f7f2;
+      color: #233127;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(12, 31, 18, 0.56);
+      z-index: 50;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(920px, 100%);
+      max-height: calc(100dvh - 36px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .modal-title { font-size: 17px; }
+
+    .icon-button {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      background: transparent;
+      border: 0;
+      border-radius: 9px;
+      font-size: 25px;
+      line-height: 1;
+      cursor: pointer;
+      color: #526154;
+    }
+
+    .icon-button:hover { background: #f2f6f2; }
+
+    footer {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 15px 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .table-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .topbar { padding: 14px 0; }
+      .topbar .shell { align-items: flex-start; gap: 12px; }
+      .live-date { max-width: 48%; font-size: 11px; padding: 7px 9px; }
+      main { padding: 20px 0 28px; }
+      .page-title { margin-bottom: 14px; }
+      .metrics, .table-list, .form-grid { grid-template-columns: 1fr; }
+      .card { border-radius: 12px; padding: 15px; }
+      .toolbar { align-items: stretch; gap: 12px; }
+      .toolbar > div { flex-basis: 100%; min-width: 0; }
+      .toolbar > div[style*="flex:0 0 auto"] { flex: 1 1 100% !important; }
+      .toolbar > div[style*="flex:0 0 auto"] .button { width: 100%; }
+      .form-actions { display: grid; grid-template-columns: 1fr; }
+      .form-actions .button { width: 100%; }
+      .action-group { min-width: 132px; }
+      .small-button { flex: 1 1 auto; min-height: 40px; }
+      .modal { padding: 10px; align-items: end; }
+      .modal-card { width: 100%; max-height: calc(100dvh - 20px); border-radius: 14px 14px 0 0; padding: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      h1 { font-size: 20px; }
+      .subtitle { font-size: 12px; }
+      .topbar .shell { flex-wrap: wrap; }
+      .topbar .shell > div:first-child { flex: 1 1 100%; }
+      .live-date { max-width: 100%; width: fit-content; }
+      .tab-list { padding-left: 0; padding-right: 0; }
+      .tab-button { min-height: 46px; padding: 12px 14px; }
+      .metric { padding: 13px; }
+      input, select, textarea { min-height: 44px; font-size: 16px; }
+      textarea { min-height: 120px; }
+      .button { min-height: 44px; font-size: 14px; }
+      table { min-width: 620px; font-size: 12px; }
+      th, td { padding: 9px; }
+      .modal-header { margin-bottom: 14px; }
+    }
+
+    @media (max-width: 360px) {
+      .shell { padding-left: 12px; padding-right: 12px; }
+      .card { padding: 13px; }
+      .tab-button { padding-left: 12px; padding-right: 12px; }
+    }
+  </style>
 </head>
-
 <body>
-    <header class="topbar">
-        <div class="shell">
-            <div>
-                <h1>Kankanba Farm Assessment</h1>
-                <p class="subtitle">Farm Data Collection Database</p>
-            </div>
-            <div id="liveDate" class="live-date"></div>
-        </div>
-    </header>
-
-    <nav class="tabs">
-        <div class="shell tab-list">
-            <button type="button" class="tab-button active" data-tab="dashboard">Dashboard</button>
-            <button type="button" class="tab-button" data-tab="entry">Data Entry</button>
-            <button type="button" class="tab-button" data-tab="records">View Records</button>
-        </div>
-    </nav>
-
-    <main class="shell">
-        <section id="dashboardPanel" class="tab-panel active">
-            <h2 class="page-title">Dashboard</h2>
-            <div class="metrics">
-                <div class="metric"><span class="metric-label">Assessment Tables</span><span id="tableCount"
-                        class="metric-value">0</span></div>
-                <div class="metric"><span class="metric-label">Saved This Session</span><span id="savedCount"
-                        class="metric-value">0</span></div>
-                <div class="metric"><span class="metric-label">Failed Saves</span><span id="failedCount"
-                        class="metric-value">0</span></div>
-            </div>
-            <div class="card">
-                <div class="toolbar">
-                    <div>
-                        <h3>Assessment Tables</h3>
-                    </div>
-                    <button id="refreshDataButton" type="button" class="button button-secondary">Refresh Data</button>
-                </div>
-                <div id="tableList" class="table-list"></div>
-            </div>
-        </section>
-
-        <section id="entryPanel" class="tab-panel">
-            <h2 class="page-title">Data Entry</h2>
-            <div class="card">
-                <div id="entryError" class="message"></div>
-                <div class="toolbar">
-                    <div>
-                        <label for="entryTableSelect">Assessment Table</label>
-                        <select id="entryTableSelect"></select>
-                    </div>
-                </div>
-                <form id="entryForm">
-                    <div id="entryFields" class="form-grid"></div>
-                    <div class="form-actions">
-                        <button id="saveEntryButton" type="submit" class="button button-primary" disabled>Save
-                            Entry</button>
-                        <button id="clearEntryButton" type="button" class="button button-secondary" disabled>Clear
-                            Form</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <section id="recordsPanel" class="tab-panel">
-            <h2 class="page-title">View Records</h2>
-            <div class="card">
-                <div id="recordsError" class="message"></div>
-                <div class="toolbar">
-                    <div>
-                        <label for="recordsTableSelect">Assessment Table</label>
-                        <select id="recordsTableSelect"></select>
-                    </div>
-                    <div>
-                        <label for="recordsSearch">Search</label>
-                        <input id="recordsSearch" type="search" placeholder="Search displayed records">
-                    </div>
-                    <div style="flex:0 0 auto; min-width:auto;">
-                        <button id="refreshRecordsButton" type="button" class="button button-secondary"
-                            disabled>Refresh</button>
-                    </div>
-                </div>
-                <div id="recordsContainer"></div>
-            </div>
-        </section>
-    </main>
-
-    <footer>© JangAfrika — Kankanba Farm Assessment System</footer>
-
-    <div id="editModal" class="modal" aria-hidden="true">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div>
-                    <h2 class="modal-title">Edit Record</h2>
-                </div>
-                <button id="closeModalButton" class="icon-button" type="button" aria-label="Close">×</button>
-            </div>
-            <div id="editError" class="message"></div>
-            <form id="editForm">
-                <input id="editTableId" type="hidden">
-                <input id="editRecordId" type="hidden">
-                <div id="editFields" class="form-grid"></div>
-                <div class="form-actions">
-                    <button id="saveChangesButton" type="submit" class="button button-primary">Save Changes</button>
-                    <button id="cancelEditButton" type="button" class="button button-secondary">Cancel</button>
-                    <button id="deleteRecordButton" type="button" class="button button-danger">Delete Record</button>
-                </div>
-            </form>
-        </div>
+  <header class="topbar">
+    <div class="shell">
+      <div>
+        <h1>Kankanba Farm Assessment</h1>
+        <p class="subtitle">Farm Data Collection Database</p>
+      </div>
+      <div id="liveDate" class="live-date"></div>
     </div>
+  </header>
 
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5FgAHrOnyDarLzdmKUcfT_wwBQri3vXnRGsw2FyPu-GvWXmF_9yEdn2qu2svd6CEosQ/exec";
-        const CACHE_PREFIX = "kfa_browser_standby_v3_";
-        const SESSION_SAVED_KEY = "kfa_session_saved_v3";
-        const VIEW_LIMIT = 150;
+  <nav class="tabs">
+    <div class="shell tab-list">
+      <button type="button" class="tab-button active" data-tab="dashboard">Dashboard</button>
+      <button type="button" class="tab-button" data-tab="entry">Data Entry</button>
+      <button type="button" class="tab-button" data-tab="records">View Records</button>
+    </div>
+  </nav>
 
-        let tables = [];
-        let entryTable = null;
-        let recordsTable = null;
-        let recordsTableId = "";
-        let savedCount = Number(sessionStorage.getItem(SESSION_SAVED_KEY) || 0);
-        let failedCount = 0;
+  <main class="shell">
+    <section id="dashboardPanel" class="tab-panel active">
+      <h2 class="page-title">Dashboard</h2>
+      <div class="metrics">
+        <div class="metric"><span class="metric-label">Assessment Tables</span><span id="tableCount" class="metric-value">0</span></div>
+        <div class="metric"><span class="metric-label">Saved This Session</span><span id="savedCount" class="metric-value">0</span></div>
+        <div class="metric"><span class="metric-label">Failed Saves</span><span id="failedCount" class="metric-value">0</span></div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div><h3>Assessment Tables</h3></div>
+          <button id="refreshDataButton" type="button" class="button button-secondary">Refresh Data</button>
+        </div>
+        <div id="tableList" class="table-list"></div>
+      </div>
+    </section>
 
-        document.addEventListener("DOMContentLoaded", initialise);
+    <section id="entryPanel" class="tab-panel">
+      <h2 class="page-title">Data Entry</h2>
+      <div class="card">
+        <div id="entryError" class="message"></div>
+        <div class="toolbar">
+          <div>
+            <label for="entryTableSelect">Assessment Table</label>
+            <select id="entryTableSelect"></select>
+          </div>
+        </div>
+        <form id="entryForm">
+          <div id="entryFields" class="form-grid"></div>
+          <div class="form-actions">
+            <button id="saveEntryButton" type="submit" class="button button-primary" disabled>Save Entry</button>
+            <button id="clearEntryButton" type="button" class="button button-secondary" disabled>Clear Form</button>
+          </div>
+        </form>
+      </div>
+    </section>
 
-        function initialise() {
-            bindEvents();
-            updateLiveDate();
-            window.setInterval(updateLiveDate, 1000);
-            updateMetrics();
+    <section id="recordsPanel" class="tab-panel">
+      <h2 class="page-title">View Records</h2>
+      <div class="card">
+        <div id="recordsError" class="message"></div>
+        <div class="toolbar">
+          <div>
+            <label for="recordsTableSelect">Assessment Table</label>
+            <select id="recordsTableSelect"></select>
+          </div>
+          <div>
+            <label for="recordsSearch">Search</label>
+            <input id="recordsSearch" type="search" placeholder="Search displayed records">
+          </div>
+          <div style="flex:0 0 auto; min-width:auto;">
+            <button id="refreshRecordsButton" type="button" class="button button-secondary" disabled>Refresh</button>
+          </div>
+        </div>
+        <div id="recordsContainer"></div>
+      </div>
+    </section>
+  </main>
 
-            if (!isConfigured()) {
-                showError("entryError", "Add the current Apps Script /exec URL in this HTML file first.");
-                return;
-            }
+  <footer>© JangAfrika — Kankanba Farm Assessment System</footer>
 
-            loadPortal();
+  <div id="editModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div><h2 class="modal-title">Edit Record</h2></div>
+        <button id="closeModalButton" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="editError" class="message"></div>
+      <form id="editForm">
+        <input id="editTableId" type="hidden">
+        <input id="editRecordId" type="hidden">
+        <div id="editFields" class="form-grid"></div>
+        <div class="form-actions">
+          <button id="saveChangesButton" type="submit" class="button button-primary">Save Changes</button>
+          <button id="cancelEditButton" type="button" class="button button-secondary">Cancel</button>
+          <button id="deleteRecordButton" type="button" class="button button-danger">Delete Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5FgAHrOnyDarLzdmKUcfT_wwBQri3vXnRGsw2FyPu-GvWXmF_9yEdn2qu2svd6CEosQ/exec";
+    const CACHE_PREFIX = "kfa_browser_standby_v3_";
+    const SESSION_SAVED_KEY = "kfa_session_saved_v3";
+    const VIEW_LIMIT = 150;
+
+    let tables = [];
+    let entryTable = null;
+    let recordsTable = null;
+    let recordsTableId = "";
+    let savedCount = Number(sessionStorage.getItem(SESSION_SAVED_KEY) || 0);
+    let failedCount = 0;
+
+    document.addEventListener("DOMContentLoaded", initialise);
+
+    function initialise() {
+      bindEvents();
+      updateLiveDate();
+      window.setInterval(updateLiveDate, 1000);
+      updateMetrics();
+
+      if (!isConfigured()) {
+        showError("entryError", "Add the current Apps Script /exec URL in this HTML file first.");
+        return;
+      }
+
+      loadPortal();
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-tab]").forEach(function(button) {
+        button.addEventListener("click", function() {
+          openTab(button.dataset.tab);
+        });
+      });
+
+      document.getElementById("entryTableSelect").addEventListener("change", function(event) {
+        loadEntryTable(event.target.value);
+      });
+
+      document.getElementById("recordsTableSelect").addEventListener("change", function(event) {
+        loadRecordsTable(event.target.value, false);
+      });
+
+      document.getElementById("recordsSearch").addEventListener("input", renderRecords);
+      document.getElementById("entryForm").addEventListener("submit", submitEntry);
+      document.getElementById("editForm").addEventListener("submit", submitEdit);
+      document.getElementById("clearEntryButton").addEventListener("click", clearEntryForm);
+      document.getElementById("refreshDataButton").addEventListener("click", refreshAllData);
+      document.getElementById("refreshRecordsButton").addEventListener("click", function() {
+        if (recordsTableId) loadRecordsTable(recordsTableId, true);
+      });
+      document.getElementById("closeModalButton").addEventListener("click", closeEditModal);
+      document.getElementById("cancelEditButton").addEventListener("click", closeEditModal);
+      document.getElementById("deleteRecordButton").addEventListener("click", deleteCurrentRecord);
+      document.getElementById("editModal").addEventListener("click", function(event) {
+        if (event.target === this) closeEditModal();
+      });
+    }
+
+    function isConfigured() {
+      return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(WEB_APP_URL);
+    }
+
+    function loadPortal() {
+      jsonp({ action: "init" })
+        .then(function(response) {
+          if (!response || !response.success) throw new Error(messageFrom(response, "Unable to load the system."));
+          tables = Array.isArray(response.tables) ? response.tables : [];
+          populateSelects();
+          renderTableList();
+          updateMetrics();
+
+          if (tables.some(function(table) { return table.id === "farm-profile"; })) {
+            document.getElementById("entryTableSelect").value = "farm-profile";
+            loadEntryTable("farm-profile");
+          }
+
+          preloadTables();
+        })
+        .catch(function(error) {
+          showError("entryError", messageFrom(error, "Unable to connect to the farm assessment server."));
+        });
+    }
+
+    function openTab(name) {
+      document.querySelectorAll(".tab-panel").forEach(function(panel) {
+        panel.classList.remove("active");
+      });
+      document.querySelectorAll(".tab-button").forEach(function(button) {
+        button.classList.toggle("active", button.dataset.tab === name);
+      });
+      const panel = document.getElementById(name + "Panel");
+      if (panel) panel.classList.add("active");
+    }
+
+    function populateSelects() {
+      const entrySelect = document.getElementById("entryTableSelect");
+      const recordsSelect = document.getElementById("recordsTableSelect");
+      entrySelect.innerHTML = '<option value="">Select an assessment table</option>';
+      recordsSelect.innerHTML = '<option value="">Select an assessment table</option>';
+
+      const groups = {};
+      tables.forEach(function(table) {
+        if (!groups[table.group]) groups[table.group] = [];
+        groups[table.group].push(table);
+      });
+
+      Object.keys(groups).forEach(function(groupName) {
+        const entryGroup = document.createElement("optgroup");
+        const recordsGroup = document.createElement("optgroup");
+        entryGroup.label = groupName;
+        recordsGroup.label = groupName;
+
+        groups[groupName].forEach(function(table) {
+          const entryOption = document.createElement("option");
+          entryOption.value = table.id;
+          entryOption.textContent = table.title;
+          entryGroup.appendChild(entryOption);
+
+          const recordsOption = document.createElement("option");
+          recordsOption.value = table.id;
+          recordsOption.textContent = table.title;
+          recordsGroup.appendChild(recordsOption);
+        });
+
+        entrySelect.appendChild(entryGroup);
+        recordsSelect.appendChild(recordsGroup);
+      });
+    }
+
+    function renderTableList() {
+      const container = document.getElementById("tableList");
+      if (!tables.length) {
+        container.innerHTML = '<div class="empty-state">No assessment tables found.</div>';
+        return;
+      }
+
+      container.innerHTML = tables.map(function(table) {
+        const cached = getCachedTable(table.id);
+        const count = cached && Array.isArray(cached.records) ? cached.records.length : 0;
+        return '<div class="table-card"><div><span class="table-card-title">' + escapeHtml(table.title) + '</span><span class="table-card-group">' + escapeHtml(table.group) + '</span></div><span class="table-card-count">' + count + '</span></div>';
+      }).join("");
+    }
+
+    function updateMetrics() {
+      document.getElementById("tableCount").textContent = tables.length;
+      document.getElementById("savedCount").textContent = savedCount;
+      document.getElementById("failedCount").textContent = failedCount;
+    }
+
+    function loadEntryTable(tableId) {
+      clearError("entryError");
+      entryTable = null;
+      setEntryButtons(false);
+
+      if (!tableId) {
+        document.getElementById("entryFields").innerHTML = "";
+        return;
+      }
+
+      const cached = getCachedTable(tableId);
+      if (cached && Array.isArray(cached.fields)) {
+        entryTable = cached;
+        renderEntryFields();
+        refreshTableSilently(tableId, false);
+        return;
+      }
+
+      jsonp({ action: "schema", tableId: tableId })
+        .then(function(response) {
+          if (!response || !response.success || !response.table) throw new Error(messageFrom(response, "Unable to load the form."));
+          entryTable = response.table;
+          renderEntryFields();
+        })
+        .catch(function(error) {
+          showError("entryError", messageFrom(error, "Unable to load the form."));
+        });
+    }
+
+    function renderEntryFields() {
+      const fields = visibleFields(entryTable.fields || []);
+      document.getElementById("entryFields").innerHTML = fields.map(function(field) {
+        return fieldMarkup(field, "", "entry");
+      }).join("");
+      setEntryButtons(fields.length > 0);
+    }
+
+    function setEntryButtons(enabled) {
+      document.getElementById("saveEntryButton").disabled = !enabled;
+      document.getElementById("clearEntryButton").disabled = !enabled;
+    }
+
+    function clearEntryForm() {
+      document.querySelectorAll("#entryFields input, #entryFields textarea, #entryFields select").forEach(function(input) {
+        input.value = "";
+      });
+      clearError("entryError");
+    }
+
+    function restoreEntryForm(values) {
+      if (hasCurrentEntryValues()) return;
+      Object.keys(values || {}).forEach(function(column) {
+        const input = document.querySelector('#entryFields [data-column="' + cssValue(column) + '"]');
+        if (input) input.value = values[column] || "";
+      });
+    }
+
+    function hasCurrentEntryValues() {
+      return Array.from(document.querySelectorAll("#entryFields [data-column]")).some(function(input) {
+        return String(input.value || "").trim() !== "";
+      });
+    }
+
+    function submitEntry(event) {
+      event.preventDefault();
+      clearError("entryError");
+
+      if (!entryTable || !entryTable.id) {
+        showError("entryError", "Select an assessment table before saving.");
+        return;
+      }
+
+      const values = collectValues("entryFields");
+      if (!Object.keys(values).some(function(key) { return String(values[key] || "").trim() !== ""; })) {
+        showError("entryError", "Enter at least one value before saving.");
+        return;
+      }
+
+      const tableId = entryTable.id;
+      const submittedValues = Object.assign({}, values);
+      clearEntryForm();
+
+      sendWrite({ action: "addRecord", tableId: tableId, values: submittedValues })
+        .then(function(response) {
+          savedCount++;
+          sessionStorage.setItem(SESSION_SAVED_KEY, String(savedCount));
+          updateMetrics();
+          addToCachedTable(tableId, response.recordId, response.entryDate, submittedValues);
+          refreshTableSilently(tableId, true);
+        })
+        .catch(function(error) {
+          failedCount++;
+          updateMetrics();
+          if (entryTable && entryTable.id === tableId) restoreEntryForm(submittedValues);
+          showError("entryError", messageFrom(error, "Unable to save this record."));
+        });
+    }
+
+    function loadRecordsTable(tableId, force) {
+      clearError("recordsError");
+      recordsTableId = tableId || "";
+      document.getElementById("refreshRecordsButton").disabled = !recordsTableId;
+
+      if (!recordsTableId) {
+        recordsTable = null;
+        document.getElementById("recordsContainer").innerHTML = "";
+        return;
+      }
+
+      const cached = getCachedTable(recordsTableId);
+      if (cached) {
+        recordsTable = cached;
+        renderRecords();
+        refreshTableSilently(recordsTableId, Boolean(force));
+        return;
+      }
+
+      fetchTable(recordsTableId, Boolean(force))
+        .then(function(table) {
+          recordsTable = table;
+          renderRecords();
+        })
+        .catch(function(error) {
+          showError("recordsError", messageFrom(error, "Unable to load records."));
+        });
+    }
+
+    function renderRecords() {
+      const container = document.getElementById("recordsContainer");
+      if (!recordsTable) {
+        container.innerHTML = "";
+        return;
+      }
+
+      const fields = visibleFields(recordsTable.fields || []);
+      const search = document.getElementById("recordsSearch").value.trim().toLowerCase();
+      const records = (recordsTable.records || []).filter(function(record) {
+        if (!search) return true;
+        const text = [record.entryDate || ""].concat(fields.map(function(field) {
+          return record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
+        })).join(" ").toLowerCase();
+        return text.indexOf(search) !== -1;
+      });
+
+      if (!records.length) {
+        container.innerHTML = '<div class="empty-state">No records found.</div>';
+        return;
+      }
+
+      const headings = '<thead><tr><th>Date</th>' + fields.map(function(field) {
+        return '<th>' + escapeHtml(field.name) + '</th>';
+      }).join("") + '<th>Actions</th></tr></thead>';
+
+      const body = '<tbody>' + records.map(function(record) {
+        const cells = '<td>' + escapeHtml(record.entryDate || "") + '</td>' + fields.map(function(field) {
+          const value = record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
+          return '<td>' + escapeHtml(value) + '</td>';
+        }).join("");
+        return '<tr>' + cells + '<td><div class="action-group"><button type="button" class="button button-secondary small-button" data-edit="' + escapeAttribute(record.recordId) + '">Edit</button><button type="button" class="button button-danger small-button" data-delete="' + escapeAttribute(record.recordId) + '">Delete</button></div></td></tr>';
+      }).join("") + '</tbody>';
+
+      container.innerHTML = '<div class="table-wrap"><table>' + headings + body + '</table></div>';
+
+      container.querySelectorAll("[data-edit]").forEach(function(button) {
+        button.addEventListener("click", function() { openEditModal(button.dataset.edit); });
+      });
+      container.querySelectorAll("[data-delete]").forEach(function(button) {
+        button.addEventListener("click", function() { requestDelete(button.dataset.delete); });
+      });
+    }
+
+    function openEditModal(recordId) {
+      const record = recordsTable && (recordsTable.records || []).find(function(item) {
+        return item.recordId === recordId;
+      });
+
+      if (!record) {
+        showError("recordsError", "The selected record could not be found. Refresh the table and try again.");
+        return;
+      }
+
+      document.getElementById("editTableId").value = recordsTable.id;
+      document.getElementById("editRecordId").value = record.recordId;
+      document.getElementById("editFields").innerHTML = visibleFields(recordsTable.fields || []).map(function(field) {
+        const value = record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
+        return fieldMarkup(field, value, "edit");
+      }).join("");
+      clearError("editError");
+      document.getElementById("editModal").classList.add("open");
+      document.getElementById("editModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.remove("open");
+      document.getElementById("editModal").setAttribute("aria-hidden", "true");
+      document.getElementById("editTableId").value = "";
+      document.getElementById("editRecordId").value = "";
+      document.getElementById("editFields").innerHTML = "";
+      clearError("editError");
+      setEditBusy(false);
+    }
+
+    function submitEdit(event) {
+      event.preventDefault();
+      const tableId = document.getElementById("editTableId").value;
+      const recordId = document.getElementById("editRecordId").value;
+      const values = collectValues("editFields");
+      if (!tableId || !recordId) return;
+
+      clearError("editError");
+      setEditBusy(true);
+
+      sendWrite({ action: "updateRecord", tableId: tableId, recordId: recordId, values: values })
+        .then(function(response) {
+          updateCachedRecord(tableId, recordId, values, response.entryDate);
+          savedCount++;
+          sessionStorage.setItem(SESSION_SAVED_KEY, String(savedCount));
+          updateMetrics();
+          closeEditModal();
+          refreshTableSilently(tableId, true);
+        })
+        .catch(function(error) {
+          showError("editError", messageFrom(error, "Unable to save changes."));
+          setEditBusy(false);
+        });
+    }
+
+    function deleteCurrentRecord() {
+      requestDelete(document.getElementById("editRecordId").value);
+    }
+
+    function requestDelete(recordId) {
+      if (!recordsTable || !recordId) return;
+      if (!window.confirm("Delete this record permanently?")) return;
+
+      const tableId = recordsTable.id;
+      clearError("recordsError");
+      setEditBusy(true);
+
+      sendWrite({ action: "deleteRecord", tableId: tableId, recordId: recordId })
+        .then(function() {
+          removeFromCachedTable(tableId, recordId);
+          closeEditModal();
+          if (recordsTableId === tableId) {
+            recordsTable = getCachedTable(tableId);
+            renderRecords();
+          }
+          refreshTableSilently(tableId, true);
+        })
+        .catch(function(error) {
+          showError("recordsError", messageFrom(error, "Unable to delete the record."));
+          setEditBusy(false);
+        });
+    }
+
+    function setEditBusy(isBusy) {
+      document.getElementById("saveChangesButton").disabled = isBusy;
+      document.getElementById("cancelEditButton").disabled = isBusy;
+      document.getElementById("deleteRecordButton").disabled = isBusy;
+    }
+
+    function sendWrite(data) {
+      return jsonp({
+        action: data.action,
+        tableId: data.tableId || "",
+        recordId: data.recordId || "",
+        values: JSON.stringify(data.values || {}),
+        requestId: createRequestId()
+      }).then(function(response) {
+        if (!response || !response.success) throw response || new Error("Unable to complete this action.");
+        return response;
+      });
+    }
+
+    function refreshAllData() {
+      preloadTables(true);
+      if (recordsTableId) refreshTableSilently(recordsTableId, true);
+    }
+
+    function preloadTables(force) {
+      const list = tables.filter(function(table) {
+        return force || !getCachedTable(table.id);
+      }).slice();
+
+      function next() {
+        const table = list.shift();
+        if (!table) return;
+        fetchTable(table.id, false).catch(function() {}).finally(next);
+      }
+
+      next();
+    }
+
+    function refreshTableSilently(tableId, force) {
+      fetchTable(tableId, force)
+        .then(function(table) {
+          if (entryTable && entryTable.id === tableId) entryTable = table;
+          if (recordsTableId === tableId) {
+            recordsTable = table;
+            renderRecords();
+          }
+          renderTableList();
+        })
+        .catch(function() {});
+    }
+
+    function fetchTable(tableId, force) {
+      return jsonp({ action: "getTable", tableId: tableId, limit: VIEW_LIMIT, force: force ? "1" : "0" })
+        .then(function(response) {
+          if (!response || !response.success || !response.table) throw new Error(messageFrom(response, "Unable to load records."));
+          saveCachedTable(response.table);
+          return response.table;
+        });
+    }
+
+    function getCacheKey(tableId) {
+      return CACHE_PREFIX + tableId;
+    }
+
+    function saveCachedTable(table) {
+      if (!table || !table.id) return;
+      try {
+        localStorage.setItem(getCacheKey(table.id), JSON.stringify(table));
+      } catch (error) {}
+    }
+
+    function getCachedTable(tableId) {
+      try {
+        const raw = localStorage.getItem(getCacheKey(tableId));
+        const table = raw ? JSON.parse(raw) : null;
+        return table && table.id ? table : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function addToCachedTable(tableId, recordId, entryDate, values) {
+      const cached = getCachedTable(tableId);
+      if (!cached) return;
+      cached.records = Array.isArray(cached.records) ? cached.records : [];
+      cached.records.unshift({ recordId: recordId, entryDate: entryDate || "", values: Object.assign({}, values) });
+      cached.records = cached.records.slice(0, VIEW_LIMIT);
+      saveCachedTable(cached);
+      renderTableList();
+    }
+
+    function updateCachedRecord(tableId, recordId, values, entryDate) {
+      const cached = getCachedTable(tableId);
+      if (!cached || !Array.isArray(cached.records)) return;
+      const record = cached.records.find(function(item) { return item.recordId === recordId; });
+      if (!record) return;
+      record.values = Object.assign({}, record.values || {}, values || {});
+      if (entryDate) record.entryDate = entryDate;
+      saveCachedTable(cached);
+    }
+
+    function removeFromCachedTable(tableId, recordId) {
+      const cached = getCachedTable(tableId);
+      if (!cached || !Array.isArray(cached.records)) return;
+      cached.records = cached.records.filter(function(record) { return record.recordId !== recordId; });
+      saveCachedTable(cached);
+      renderTableList();
+    }
+
+    function fieldMarkup(field, value, prefix) {
+      const name = String(field.name || "");
+      const inputId = prefix + "_" + field.column;
+      const textArea = /detail|description|remark|comment|observation|issue|problem|action|recommendation|note|address/i.test(name) && !/date/i.test(name);
+      const type = /date/i.test(name) ? "date" : "text";
+      const safeValue = value === null || value === undefined ? "" : String(value);
+      const input = textArea
+        ? '<textarea id="' + escapeAttribute(inputId) + '" data-column="' + escapeAttribute(field.column) + '">' + escapeHtml(safeValue) + '</textarea>'
+        : '<input id="' + escapeAttribute(inputId) + '" data-column="' + escapeAttribute(field.column) + '" type="' + type + '" value="' + escapeAttribute(safeValue) + '">';
+      return '<div class="' + (textArea ? "wide-field" : "") + '"><label for="' + escapeAttribute(inputId) + '">' + escapeHtml(name) + '</label>' + input + '</div>';
+    }
+
+    function visibleFields(fields) {
+      return (fields || []).filter(function(field) {
+        const name = String(field.name || "").trim().toLowerCase();
+        return name !== "record id" && name !== "entry date";
+      });
+    }
+
+    function collectValues(containerId) {
+      const values = {};
+      document.querySelectorAll("#" + containerId + " [data-column]").forEach(function(input) {
+        values[input.dataset.column] = input.value;
+      });
+      return values;
+    }
+
+    function jsonp(params) {
+      return new Promise(function(resolve, reject) {
+        const callback = "kfaCallback" + Date.now() + Math.floor(Math.random() * 1000000);
+        let done = false;
+        let script;
+        const timeout = setTimeout(function() {
+          finish(null, new Error("The farm assessment server took too long to respond."));
+        }, 30000);
+
+        function finish(result, error) {
+          if (done) return;
+          done = true;
+          clearTimeout(timeout);
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callback]; } catch (error) { window[callback] = undefined; }
+          if (error) reject(error); else resolve(result);
         }
 
-        function bindEvents() {
-            document.querySelectorAll("[data-tab]").forEach(function (button) {
-                button.addEventListener("click", function () {
-                    openTab(button.dataset.tab);
-                });
-            });
-
-            document.getElementById("entryTableSelect").addEventListener("change", function (event) {
-                loadEntryTable(event.target.value);
-            });
-
-            document.getElementById("recordsTableSelect").addEventListener("change", function (event) {
-                loadRecordsTable(event.target.value, false);
-            });
-
-            document.getElementById("recordsSearch").addEventListener("input", renderRecords);
-            document.getElementById("entryForm").addEventListener("submit", submitEntry);
-            document.getElementById("editForm").addEventListener("submit", submitEdit);
-            document.getElementById("clearEntryButton").addEventListener("click", clearEntryForm);
-            document.getElementById("refreshDataButton").addEventListener("click", refreshAllData);
-            document.getElementById("refreshRecordsButton").addEventListener("click", function () {
-                if (recordsTableId) loadRecordsTable(recordsTableId, true);
-            });
-            document.getElementById("closeModalButton").addEventListener("click", closeEditModal);
-            document.getElementById("cancelEditButton").addEventListener("click", closeEditModal);
-            document.getElementById("deleteRecordButton").addEventListener("click", deleteCurrentRecord);
-            document.getElementById("editModal").addEventListener("click", function (event) {
-                if (event.target === this) closeEditModal();
-            });
-        }
-
-        function isConfigured() {
-            return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(WEB_APP_URL);
-        }
-
-        function loadPortal() {
-            jsonp({ action: "init" })
-                .then(function (response) {
-                    if (!response || !response.success) throw new Error(messageFrom(response, "Unable to load the system."));
-                    tables = Array.isArray(response.tables) ? response.tables : [];
-                    populateSelects();
-                    renderTableList();
-                    updateMetrics();
-
-                    if (tables.some(function (table) { return table.id === "farm-profile"; })) {
-                        document.getElementById("entryTableSelect").value = "farm-profile";
-                        loadEntryTable("farm-profile");
-                    }
-
-                    preloadTables();
-                })
-                .catch(function (error) {
-                    showError("entryError", messageFrom(error, "Unable to connect to the farm assessment server."));
-                });
-        }
-
-        function openTab(name) {
-            document.querySelectorAll(".tab-panel").forEach(function (panel) {
-                panel.classList.remove("active");
-            });
-            document.querySelectorAll(".tab-button").forEach(function (button) {
-                button.classList.toggle("active", button.dataset.tab === name);
-            });
-            const panel = document.getElementById(name + "Panel");
-            if (panel) panel.classList.add("active");
-        }
-
-        function populateSelects() {
-            const entrySelect = document.getElementById("entryTableSelect");
-            const recordsSelect = document.getElementById("recordsTableSelect");
-            entrySelect.innerHTML = '<option value="">Select an assessment table</option>';
-            recordsSelect.innerHTML = '<option value="">Select an assessment table</option>';
-
-            const groups = {};
-            tables.forEach(function (table) {
-                if (!groups[table.group]) groups[table.group] = [];
-                groups[table.group].push(table);
-            });
-
-            Object.keys(groups).forEach(function (groupName) {
-                const entryGroup = document.createElement("optgroup");
-                const recordsGroup = document.createElement("optgroup");
-                entryGroup.label = groupName;
-                recordsGroup.label = groupName;
-
-                groups[groupName].forEach(function (table) {
-                    const entryOption = document.createElement("option");
-                    entryOption.value = table.id;
-                    entryOption.textContent = table.title;
-                    entryGroup.appendChild(entryOption);
-
-                    const recordsOption = document.createElement("option");
-                    recordsOption.value = table.id;
-                    recordsOption.textContent = table.title;
-                    recordsGroup.appendChild(recordsOption);
-                });
-
-                entrySelect.appendChild(entryGroup);
-                recordsSelect.appendChild(recordsGroup);
-            });
-        }
-
-        function renderTableList() {
-            const container = document.getElementById("tableList");
-            if (!tables.length) {
-                container.innerHTML = '<div class="empty-state">No assessment tables found.</div>';
-                return;
-            }
-
-            container.innerHTML = tables.map(function (table) {
-                const cached = getCachedTable(table.id);
-                const count = cached && Array.isArray(cached.records) ? cached.records.length : 0;
-                return '<div class="table-card"><div><span class="table-card-title">' + escapeHtml(table.title) + '</span><span class="table-card-group">' + escapeHtml(table.group) + '</span></div><span class="table-card-count">' + count + '</span></div>';
-            }).join("");
-        }
-
-        function updateMetrics() {
-            document.getElementById("tableCount").textContent = tables.length;
-            document.getElementById("savedCount").textContent = savedCount;
-            document.getElementById("failedCount").textContent = failedCount;
-        }
-
-        function loadEntryTable(tableId) {
-            clearError("entryError");
-            entryTable = null;
-            setEntryButtons(false);
-
-            if (!tableId) {
-                document.getElementById("entryFields").innerHTML = "";
-                return;
-            }
-
-            const cached = getCachedTable(tableId);
-            if (cached && Array.isArray(cached.fields)) {
-                entryTable = cached;
-                renderEntryFields();
-                refreshTableSilently(tableId, false);
-                return;
-            }
-
-            jsonp({ action: "schema", tableId: tableId })
-                .then(function (response) {
-                    if (!response || !response.success || !response.table) throw new Error(messageFrom(response, "Unable to load the form."));
-                    entryTable = response.table;
-                    renderEntryFields();
-                })
-                .catch(function (error) {
-                    showError("entryError", messageFrom(error, "Unable to load the form."));
-                });
-        }
-
-        function renderEntryFields() {
-            const fields = visibleFields(entryTable.fields || []);
-            document.getElementById("entryFields").innerHTML = fields.map(function (field) {
-                return fieldMarkup(field, "", "entry");
-            }).join("");
-            setEntryButtons(fields.length > 0);
-        }
-
-        function setEntryButtons(enabled) {
-            document.getElementById("saveEntryButton").disabled = !enabled;
-            document.getElementById("clearEntryButton").disabled = !enabled;
-        }
-
-        function clearEntryForm() {
-            document.querySelectorAll("#entryFields input, #entryFields textarea, #entryFields select").forEach(function (input) {
-                input.value = "";
-            });
-            clearError("entryError");
-        }
-
-        function restoreEntryForm(values) {
-            if (hasCurrentEntryValues()) return;
-            Object.keys(values || {}).forEach(function (column) {
-                const input = document.querySelector('#entryFields [data-column="' + cssValue(column) + '"]');
-                if (input) input.value = values[column] || "";
-            });
-        }
-
-        function hasCurrentEntryValues() {
-            return Array.from(document.querySelectorAll("#entryFields [data-column]")).some(function (input) {
-                return String(input.value || "").trim() !== "";
-            });
-        }
-
-        function submitEntry(event) {
-            event.preventDefault();
-            clearError("entryError");
-
-            if (!entryTable || !entryTable.id) {
-                showError("entryError", "Select an assessment table before saving.");
-                return;
-            }
-
-            const values = collectValues("entryFields");
-            if (!Object.keys(values).some(function (key) { return String(values[key] || "").trim() !== ""; })) {
-                showError("entryError", "Enter at least one value before saving.");
-                return;
-            }
-
-            const tableId = entryTable.id;
-            const submittedValues = Object.assign({}, values);
-            clearEntryForm();
-
-            sendWrite({ action: "addRecord", tableId: tableId, values: submittedValues })
-                .then(function (response) {
-                    savedCount++;
-                    sessionStorage.setItem(SESSION_SAVED_KEY, String(savedCount));
-                    updateMetrics();
-                    addToCachedTable(tableId, response.recordId, response.entryDate, submittedValues);
-                    refreshTableSilently(tableId, true);
-                })
-                .catch(function (error) {
-                    failedCount++;
-                    updateMetrics();
-                    if (entryTable && entryTable.id === tableId) restoreEntryForm(submittedValues);
-                    showError("entryError", messageFrom(error, "Unable to save this record."));
-                });
-        }
-
-        function loadRecordsTable(tableId, force) {
-            clearError("recordsError");
-            recordsTableId = tableId || "";
-            document.getElementById("refreshRecordsButton").disabled = !recordsTableId;
-
-            if (!recordsTableId) {
-                recordsTable = null;
-                document.getElementById("recordsContainer").innerHTML = "";
-                return;
-            }
-
-            const cached = getCachedTable(recordsTableId);
-            if (cached) {
-                recordsTable = cached;
-                renderRecords();
-                refreshTableSilently(recordsTableId, Boolean(force));
-                return;
-            }
-
-            fetchTable(recordsTableId, Boolean(force))
-                .then(function (table) {
-                    recordsTable = table;
-                    renderRecords();
-                })
-                .catch(function (error) {
-                    showError("recordsError", messageFrom(error, "Unable to load records."));
-                });
-        }
-
-        function renderRecords() {
-            const container = document.getElementById("recordsContainer");
-            if (!recordsTable) {
-                container.innerHTML = "";
-                return;
-            }
-
-            const fields = visibleFields(recordsTable.fields || []);
-            const search = document.getElementById("recordsSearch").value.trim().toLowerCase();
-            const records = (recordsTable.records || []).filter(function (record) {
-                if (!search) return true;
-                const text = [record.entryDate || ""].concat(fields.map(function (field) {
-                    return record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
-                })).join(" ").toLowerCase();
-                return text.indexOf(search) !== -1;
-            });
-
-            if (!records.length) {
-                container.innerHTML = '<div class="empty-state">No records found.</div>';
-                return;
-            }
-
-            const headings = '<thead><tr><th>Date</th>' + fields.map(function (field) {
-                return '<th>' + escapeHtml(field.name) + '</th>';
-            }).join("") + '<th>Actions</th></tr></thead>';
-
-            const body = '<tbody>' + records.map(function (record) {
-                const cells = '<td>' + escapeHtml(record.entryDate || "") + '</td>' + fields.map(function (field) {
-                    const value = record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
-                    return '<td>' + escapeHtml(value) + '</td>';
-                }).join("");
-                return '<tr>' + cells + '<td><div class="action-group"><button type="button" class="button button-secondary small-button" data-edit="' + escapeAttribute(record.recordId) + '">Edit</button><button type="button" class="button button-danger small-button" data-delete="' + escapeAttribute(record.recordId) + '">Delete</button></div></td></tr>';
-            }).join("") + '</tbody>';
-
-            container.innerHTML = '<div class="table-wrap"><table>' + headings + body + '</table></div>';
-
-            container.querySelectorAll("[data-edit]").forEach(function (button) {
-                button.addEventListener("click", function () { openEditModal(button.dataset.edit); });
-            });
-            container.querySelectorAll("[data-delete]").forEach(function (button) {
-                button.addEventListener("click", function () { requestDelete(button.dataset.delete); });
-            });
-        }
-
-        function openEditModal(recordId) {
-            const record = recordsTable && (recordsTable.records || []).find(function (item) {
-                return item.recordId === recordId;
-            });
-
-            if (!record) {
-                showError("recordsError", "The selected record could not be found. Refresh the table and try again.");
-                return;
-            }
-
-            document.getElementById("editTableId").value = recordsTable.id;
-            document.getElementById("editRecordId").value = record.recordId;
-            document.getElementById("editFields").innerHTML = visibleFields(recordsTable.fields || []).map(function (field) {
-                const value = record.values && record.values[field.column] !== undefined ? record.values[field.column] : "";
-                return fieldMarkup(field, value, "edit");
-            }).join("");
-            clearError("editError");
-            document.getElementById("editModal").classList.add("open");
-            document.getElementById("editModal").setAttribute("aria-hidden", "false");
-        }
-
-        function closeEditModal() {
-            document.getElementById("editModal").classList.remove("open");
-            document.getElementById("editModal").setAttribute("aria-hidden", "true");
-            document.getElementById("editTableId").value = "";
-            document.getElementById("editRecordId").value = "";
-            document.getElementById("editFields").innerHTML = "";
-            clearError("editError");
-            setEditBusy(false);
-        }
-
-        function submitEdit(event) {
-            event.preventDefault();
-            const tableId = document.getElementById("editTableId").value;
-            const recordId = document.getElementById("editRecordId").value;
-            const values = collectValues("editFields");
-            if (!tableId || !recordId) return;
-
-            clearError("editError");
-            setEditBusy(true);
-
-            sendWrite({ action: "updateRecord", tableId: tableId, recordId: recordId, values: values })
-                .then(function (response) {
-                    updateCachedRecord(tableId, recordId, values, response.entryDate);
-                    savedCount++;
-                    sessionStorage.setItem(SESSION_SAVED_KEY, String(savedCount));
-                    updateMetrics();
-                    closeEditModal();
-                    refreshTableSilently(tableId, true);
-                })
-                .catch(function (error) {
-                    showError("editError", messageFrom(error, "Unable to save changes."));
-                    setEditBusy(false);
-                });
-        }
-
-        function deleteCurrentRecord() {
-            requestDelete(document.getElementById("editRecordId").value);
-        }
-
-        function requestDelete(recordId) {
-            if (!recordsTable || !recordId) return;
-            if (!window.confirm("Delete this record permanently?")) return;
-
-            const tableId = recordsTable.id;
-            clearError("recordsError");
-            setEditBusy(true);
-
-            sendWrite({ action: "deleteRecord", tableId: tableId, recordId: recordId })
-                .then(function () {
-                    removeFromCachedTable(tableId, recordId);
-                    closeEditModal();
-                    if (recordsTableId === tableId) {
-                        recordsTable = getCachedTable(tableId);
-                        renderRecords();
-                    }
-                    refreshTableSilently(tableId, true);
-                })
-                .catch(function (error) {
-                    showError("recordsError", messageFrom(error, "Unable to delete the record."));
-                    setEditBusy(false);
-                });
-        }
-
-        function setEditBusy(isBusy) {
-            document.getElementById("saveChangesButton").disabled = isBusy;
-            document.getElementById("cancelEditButton").disabled = isBusy;
-            document.getElementById("deleteRecordButton").disabled = isBusy;
-        }
-
-        function sendWrite(data) {
-            return jsonp({
-                action: data.action,
-                tableId: data.tableId || "",
-                recordId: data.recordId || "",
-                values: JSON.stringify(data.values || {}),
-                requestId: createRequestId()
-            }).then(function (response) {
-                if (!response || !response.success) throw response || new Error("Unable to complete this action.");
-                return response;
-            });
-        }
-
-        function refreshAllData() {
-            preloadTables(true);
-            if (recordsTableId) refreshTableSilently(recordsTableId, true);
-        }
-
-        function preloadTables(force) {
-            const list = tables.filter(function (table) {
-                return force || !getCachedTable(table.id);
-            }).slice();
-
-            function next() {
-                const table = list.shift();
-                if (!table) return;
-                fetchTable(table.id, false).catch(function () { }).finally(next);
-            }
-
-            next();
-        }
-
-        function refreshTableSilently(tableId, force) {
-            fetchTable(tableId, force)
-                .then(function (table) {
-                    if (entryTable && entryTable.id === tableId) entryTable = table;
-                    if (recordsTableId === tableId) {
-                        recordsTable = table;
-                        renderRecords();
-                    }
-                    renderTableList();
-                })
-                .catch(function () { });
-        }
-
-        function fetchTable(tableId, force) {
-            return jsonp({ action: "getTable", tableId: tableId, limit: VIEW_LIMIT, force: force ? "1" : "0" })
-                .then(function (response) {
-                    if (!response || !response.success || !response.table) throw new Error(messageFrom(response, "Unable to load records."));
-                    saveCachedTable(response.table);
-                    return response.table;
-                });
-        }
-
-        function getCacheKey(tableId) {
-            return CACHE_PREFIX + tableId;
-        }
-
-        function saveCachedTable(table) {
-            if (!table || !table.id) return;
-            try {
-                localStorage.setItem(getCacheKey(table.id), JSON.stringify(table));
-            } catch (error) { }
-        }
-
-        function getCachedTable(tableId) {
-            try {
-                const raw = localStorage.getItem(getCacheKey(tableId));
-                const table = raw ? JSON.parse(raw) : null;
-                return table && table.id ? table : null;
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function addToCachedTable(tableId, recordId, entryDate, values) {
-            const cached = getCachedTable(tableId);
-            if (!cached) return;
-            cached.records = Array.isArray(cached.records) ? cached.records : [];
-            cached.records.unshift({ recordId: recordId, entryDate: entryDate || "", values: Object.assign({}, values) });
-            cached.records = cached.records.slice(0, VIEW_LIMIT);
-            saveCachedTable(cached);
-            renderTableList();
-        }
-
-        function updateCachedRecord(tableId, recordId, values, entryDate) {
-            const cached = getCachedTable(tableId);
-            if (!cached || !Array.isArray(cached.records)) return;
-            const record = cached.records.find(function (item) { return item.recordId === recordId; });
-            if (!record) return;
-            record.values = Object.assign({}, record.values || {}, values || {});
-            if (entryDate) record.entryDate = entryDate;
-            saveCachedTable(cached);
-        }
-
-        function removeFromCachedTable(tableId, recordId) {
-            const cached = getCachedTable(tableId);
-            if (!cached || !Array.isArray(cached.records)) return;
-            cached.records = cached.records.filter(function (record) { return record.recordId !== recordId; });
-            saveCachedTable(cached);
-            renderTableList();
-        }
-
-        function fieldMarkup(field, value, prefix) {
-            const name = String(field.name || "");
-            const inputId = prefix + "_" + field.column;
-            const textArea = /detail|description|remark|comment|observation|issue|problem|action|recommendation|note|address/i.test(name) && !/date/i.test(name);
-            const type = /date/i.test(name) ? "date" : "text";
-            const safeValue = value === null || value === undefined ? "" : String(value);
-            const input = textArea
-                ? '<textarea id="' + escapeAttribute(inputId) + '" data-column="' + escapeAttribute(field.column) + '">' + escapeHtml(safeValue) + '</textarea>'
-                : '<input id="' + escapeAttribute(inputId) + '" data-column="' + escapeAttribute(field.column) + '" type="' + type + '" value="' + escapeAttribute(safeValue) + '">';
-            return '<div class="' + (textArea ? "wide-field" : "") + '"><label for="' + escapeAttribute(inputId) + '">' + escapeHtml(name) + '</label>' + input + '</div>';
-        }
-
-        function visibleFields(fields) {
-            return (fields || []).filter(function (field) {
-                const name = String(field.name || "").trim().toLowerCase();
-                return name !== "record id" && name !== "entry date";
-            });
-        }
-
-        function collectValues(containerId) {
-            const values = {};
-            document.querySelectorAll("#" + containerId + " [data-column]").forEach(function (input) {
-                values[input.dataset.column] = input.value;
-            });
-            return values;
-        }
-
-        function jsonp(params) {
-            return new Promise(function (resolve, reject) {
-                const callback = "kfaCallback" + Date.now() + Math.floor(Math.random() * 1000000);
-                let done = false;
-                let script;
-                const timeout = setTimeout(function () {
-                    finish(null, new Error("The farm assessment server took too long to respond."));
-                }, 30000);
-
-                function finish(result, error) {
-                    if (done) return;
-                    done = true;
-                    clearTimeout(timeout);
-                    if (script && script.parentNode) script.parentNode.removeChild(script);
-                    try { delete window[callback]; } catch (error) { window[callback] = undefined; }
-                    if (error) reject(error); else resolve(result);
-                }
-
-                window[callback] = function (response) { finish(response, null); };
-                script = document.createElement("script");
-                script.async = true;
-                script.onerror = function () { finish(null, new Error("Unable to connect to the farm assessment server.")); };
-                script.src = WEB_APP_URL + "?" + new URLSearchParams(Object.assign({}, params, { callback: callback })).toString();
-                document.body.appendChild(script);
-            });
-        }
-
-        function createRequestId() {
-            if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
-            return "kfa_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-        }
-
-        function updateLiveDate() {
-            document.getElementById("liveDate").textContent = new Date().toLocaleString("en-GB", {
-                timeZone: "Africa/Banjul",
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false
-            });
-        }
-
-        function showError(id, message) {
-            const box = document.getElementById(id);
-            box.textContent = message;
-            box.classList.add("show");
-        }
-
-        function clearError(id) {
-            const box = document.getElementById(id);
-            box.textContent = "";
-            box.classList.remove("show");
-        }
-
-        function messageFrom(error, fallback) {
-            if (error && error.message) return error.message;
-            if (error && error.result && error.result.message) return error.result.message;
-            return fallback;
-        }
-
-        function escapeHtml(value) {
-            return String(value === null || value === undefined ? "" : value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        function escapeAttribute(value) {
-            return escapeHtml(value);
-        }
-
-        function cssValue(value) {
-            return String(value).replace(/\"/g, '\\\"');
-        }
-    </script>
+        window[callback] = function(response) { finish(response, null); };
+        script = document.createElement("script");
+        script.async = true;
+        script.onerror = function() { finish(null, new Error("Unable to connect to the farm assessment server.")); };
+        script.src = WEB_APP_URL + "?" + new URLSearchParams(Object.assign({}, params, { callback: callback })).toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function createRequestId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+      return "kfa_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+    }
+
+    function updateLiveDate() {
+      document.getElementById("liveDate").textContent = new Date().toLocaleString("en-GB", {
+        timeZone: "Africa/Banjul",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+    }
+
+    function showError(id, message) {
+      const box = document.getElementById(id);
+      box.textContent = message;
+      box.classList.add("show");
+    }
+
+    function clearError(id) {
+      const box = document.getElementById(id);
+      box.textContent = "";
+      box.classList.remove("show");
+    }
+
+    function messageFrom(error, fallback) {
+      if (error && error.message) return error.message;
+      if (error && error.result && error.result.message) return error.result.message;
+      return fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value === null || value === undefined ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    function cssValue(value) {
+      return String(value).replace(/\"/g, '\\\"');
+    }
+  </script>
 </body>
-
 </html>
